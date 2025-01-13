@@ -1,7 +1,7 @@
 # web-wizards
 
 ## Team Members
-- Md. Mehedi Hasan Parvez  [mehediparvez](URL "github.com/mehediparvez") (Team Leader)
+- Md. Mehedi Hasan Parvez -  [mehediparvez](URL "https://github.com/mehediparvez") (Team Leader)
 - mehediparvez (Team Leader)
 - Faysal0009
 - YEAD007
