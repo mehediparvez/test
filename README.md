@@ -2,7 +2,8 @@
 
 ## Team Members
 - Md. Mehedi Hasan Parvez -  [mehediparvez](URL "https://github.com/mehediparvez") (Team Leader)
-- Faysal0009
+- Faysal Ahammed  [Faysal0009](URL "https://github.com/Faysal0009") 
+
 - Ishtiak Ahmed-[YEAD007](URL "https://github.com/YEAD007") 
 
 ## Mentor
