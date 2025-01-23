@@ -6,6 +6,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',  // Bind to all network interfaces
-    port: 5173,        // Ensure the port is set correctly
+    port: 5173, 
+    strictport:true,
+    watch:{
+      usepolling:true
+    },       // Ensure the port is set correctly
   }
 })
