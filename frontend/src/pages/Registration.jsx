@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form'; // Import React Hook Form
+import { useForm } from 'react-hook-form'; 
+import{ Link } from 'react-router-dom';// Import React Hook Form
 
 const Register = () => {
   const {
