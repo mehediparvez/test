@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 function Navbar() {
   return (
@@ -15,41 +16,38 @@ function Navbar() {
               stroke="currentColor"
               className="h-6 w-6"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 6v12m6-6H6"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6" />
             </svg>
           </div>
-          <span className="text-green-800 text-xl font-semibold ml-2">amerhealth</span>
+          <span className="text-green-800 text-xl font-semibold ml-2">Amarhealth</span>
         </div>
 
         {/* Navigation Links */}
         <div className="hidden md:flex space-x-8">
-          <a href="#" className="text-green-800 hover:text-green-600 ">
+          <a href="#" className="text-green-800 hover:text-green-600">
             For users
           </a>
-          <a href="#" className="text-green-800 hover:text-green-600 ">
+          <a href="#" className="text-green-800 hover:text-green-600">
             For clinics
           </a>
-          <a href="#" className="text-green-800 hover:text-green-600 ">
+          <a href="#" className="text-green-800 hover:text-green-600">
             News
           </a>
         </div>
 
         {/* Login and Language */}
-        <div className="flex items-center space-x-4">
-          <button className="bg-green-800 text-white px-4 py-2 rounded-full hover:bg-green-700">
+        <div className="flex items-center space-x-1 py-2 ml-[-10px]">
+          {/* Login Button */}
+          <Link
+            to="/login"
+            className="bg-green-800 text-white px-4 py-2 rounded-full hover:bg-green-700 mr-4"
+          >
             Log in
-          </button>
-          
-          </div>
+          </Link>
         </div>
-      
+      </div>
     </nav>
   );
 }
 
 export default Navbar;
-

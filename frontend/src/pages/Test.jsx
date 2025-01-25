@@ -18,6 +18,7 @@ function Test() {
     return (
       <div>
         <h1>Data from Django API</h1>
+        <h1>yead</h1>
         <pre>{JSON.stringify(data, null, 2)}</pre>
       </div>
     );
