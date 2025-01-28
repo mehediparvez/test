@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Test from "./pages/Test";
 import Registration from "./pages/Registration"; // Ensure this import is correct
 import Login from "./pages/Login";
+import Dashboard from "./components/Dashboard/Dashboard";
 
 function App() {
   return (
@@ -13,6 +14,8 @@ function App() {
         <Route path="/test" element={<Test />} />
         <Route path="/registration" element={<Registration />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        
       </Routes>
     </Router>
   );
