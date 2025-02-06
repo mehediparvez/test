@@ -14,7 +14,7 @@ def wait_for_db():
                 user='mhpcoder',
                 password='justkidding12!@',
                 database='learnathon',
-                port=3306
+                port='3306'
             )
         except MySQLdb.OperationalError:
             print("Database unavailable, waiting 1 second...")

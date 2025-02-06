@@ -11,10 +11,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import environ
 import os
-
-
+from datetime import timedelta
+import environ
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,6 +48,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
 ]
 
+AUTH_USER_MODEL = 'users.Users'
 # Application definition
 
 INSTALLED_APPS = [
@@ -54,10 +57,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
     'api',
+    'apps.users',
+    
 ]
 
 MIDDLEWARE = [
@@ -97,12 +105,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'learnathon',
-        'USER': 'mhpcoder',
-        'PASSWORD': 'justkidding12!@',
-        'HOST': 'db',
-        'PORT': '3306',
+        'ENGINE': env('DATABASE_ENGINE'),
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': env('DATABASE_PORT'),
     }
 }
 
@@ -147,3 +155,38 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+
+# Simple JWT Settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Duration for access token validity
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Duration for refresh token validity
+    'ROTATE_REFRESH_TOKENS': True,                    # Allow rotating refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,                 # Blacklist old refresh tokens after rotation
+    'ALGORITHM': 'HS256',                             # Algorithm for encoding/decoding JWT tokens
+    'SIGNING_KEY': SECRET_KEY,                        # Signing key used for token encryption, typically your SECRET_KEY
+    # 'VERIFYING_KEY': None,                            # Optional: Public key used for verification (if using asymmetric signing)
+    'AUTH_HEADER_TYPES': ('Bearer',),                 # Default prefix for the Authorization header
+    # 'USER_ID_FIELD': 'id',                            # User identifier field
+    # 'USER_ID_CLAIM': 'user_id',                       # Custom claim for user ID in the token
+}
+
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': env('CLOUDINARY_API_KEY'),
+    'API_SECRET': env('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+

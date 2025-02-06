@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form'; 
-import{ Link } from 'react-router-dom';// Import React Hook Form
+import { useForm } from 'react-hook-form';
+import { useNavigate, Link } from 'react-router-dom';
+import { registerUser } from '../api/authUser'; // Import the registerUser function
 
 const Register = () => {
   const {
@@ -9,24 +10,25 @@ const Register = () => {
     formState: { errors },
     watch,
   } = useForm();
-
+  
+  const navigate = useNavigate();
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const onSubmit = (data) => {
-    console.log('Form Data:', data);
+  const onSubmit = async (data) => {
+    console.log(data);
+    try {
+      const response = await registerUser(data);
+      console.log('Registration successful:', response);
+      navigate('/login');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      setErrorMessage(error.message);
+    }
   };
 
   // Watch the password field to detect changes
   const password = watch('password');
-
-  // Get the list of countries
-  const countries = [
-    { code: 'BD', name: 'Bangladesh' },
-    { code: 'US', name: 'United States' },
-    { code: 'IN', name: 'India' },
-    { code: 'GB', name: 'United Kingdom' },
-    // Add more countries as needed
-  ];
 
   return (
     <section className="min-h-screen bg-green-100 flex items-center justify-center p-4">
@@ -148,41 +150,21 @@ const Register = () => {
             )}
           </div>
 
-          {/* Sex */}
+          {/* Gender */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Sex</label>
+            <label className="block text-sm font-medium mb-2">Gender</label>
             <select
-              {...register('sex', { required: 'Sex is required' })}
+              {...register('Gender', { required: 'Gender is required' })}
               className="w-full px-3 py-2 border rounded-lg"
-              aria-label="Sex"
+              aria-label="Gender"
             >
-              <option value="">Select Sex</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
-            {errors.sex && (
-              <p className="text-red-500 text-sm mt-1">{errors.sex.message}</p>
-            )}
-          </div>
-
-          {/* Country */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Country</label>
-            <select
-              {...register('country', { required: 'Country is required' })}
-              className="w-full px-3 py-2 border rounded-lg"
-              aria-label="Country"
-            >
-              <option value="">Select Country</option>
-              {countries.map((country) => (
-                <option key={country.code} value={country.name}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-            {errors.country && (
-              <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>
+            {errors.Gender && (
+              <p className="text-red-500 text-sm mt-1">{errors.Gender.message}</p>
             )}
           </div>
 
@@ -200,17 +182,17 @@ const Register = () => {
             )}
           </div>
 
-          {/* City */}
+          {/* Address */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">City</label>
+            <label className="block text-sm font-medium mb-2">Address</label>
             <input
               type="text"
-              {...register('city', { required: 'City is required' })}
+              {...register('address', { required: 'Address is required' })}
               className="w-full px-3 py-2 border rounded-lg"
-              aria-label="City"
+              aria-label="Address"
             />
-            {errors.city && (
-              <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>
+            {errors.address && (
+              <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
             )}
           </div>
 
@@ -245,6 +227,23 @@ const Register = () => {
             )}
           </div>
 
+          {/* Hidden User Type */}
+          <input
+            type="hidden"
+            {...register('user_type')}
+            value="Patient"
+          />
+          <input
+            type="hidden"
+            {...register('blood_group')}
+            value="A+"
+          />
+          <input
+            type="hidden"
+            {...register('blood_pressure')}
+            value="120"
+          />
+
           {/* Submit Button */}
           <button
             type="submit"
@@ -258,9 +257,9 @@ const Register = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{' '}
-            <a href="/login" className="text-blue-600">
+            <Link to="/login" className="text-blue-600">
               Login
-            </a>
+            </Link>
           </p>
         </div>
       </div>

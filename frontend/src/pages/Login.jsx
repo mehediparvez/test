@@ -1,6 +1,8 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom"; // Import Link for navigation
+import React, { useState, useContext } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+import { loginUser } from '../api/authUser';
+import { AuthContext } from '../context/authContext';
 
 const Login = () => {
   const {
@@ -9,9 +11,20 @@ const Login = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log("Login Data:", data);
-    // Add your login logic here
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const onSubmit = async (data) => {
+    try {
+      const response = await loginUser(data);
+      console.log('Login successful:', response);
+      login(response.access);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login failed:', error);
+      setErrorMessage(error.message);
+    }
   };
 
   return (
@@ -25,13 +38,13 @@ const Login = () => {
               type="email"
               placeholder="Type your email address"
               className={`w-full p-3 border ${
-                errors.email ? "border-red-500" : "border-gray-300"
+                errors.email ? 'border-red-500' : 'border-gray-300'
               } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              {...register("email", {
-                required: "Email is required",
+              {...register('email', {
+                required: 'Email is required',
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
+                  message: 'Invalid email address',
                 },
               })}
             />
@@ -46,13 +59,13 @@ const Login = () => {
               type="password"
               placeholder="Type your password"
               className={`w-full p-3 border ${
-                errors.password ? "border-red-500" : "border-gray-300"
+                errors.password ? 'border-red-500' : 'border-gray-300'
               } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              {...register("password", {
-                required: "Password is required",
+              {...register('password', {
+                required: 'Password is required',
                 minLength: {
                   value: 6,
-                  message: "Password must be at least 6 characters",
+                  message: 'Password must be at least 6 characters',
                 },
               })}
             />
@@ -60,6 +73,11 @@ const Login = () => {
               <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
             )}
           </div>
+
+          {/* Error Message */}
+          {errorMessage && (
+            <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
+          )}
 
           {/* Submit Button */}
           <button
@@ -72,7 +90,7 @@ const Login = () => {
 
         {/* Link to Registration Page */}
         <p className="text-center mt-4 text-sm text-gray-600">
-          Don't have an account?{" "}
+          Don't have an account?{' '}
           <Link to="/registration" className="text-blue-500 hover:underline">
             Register
           </Link>
@@ -104,8 +122,8 @@ const Login = () => {
           <br />
           <a href="/terms" className="text-blue-500 hover:underline">
             Terms Of Use
-          </a>{" "}
-          |{" "}
+          </a>{' '}
+          |{' '}
           <a href="/privacy" className="text-blue-500 hover:underline">
             Privacy Policy
           </a>

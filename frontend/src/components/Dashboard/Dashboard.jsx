@@ -1,8 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Bar } from 'react-chartjs-2';
-
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { FaTachometerAlt, FaPills, FaClipboardList, FaHeart, FaUsers, FaComments, FaCalendarAlt, FaCog } from 'react-icons/fa';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import {
+  FaTachometerAlt,
+  FaPills,
+  FaClipboardList,
+  FaHeart,
+  FaUsers,
+  FaComments,
+  FaCalendarAlt,
+  FaCog,
+} from 'react-icons/fa';
+import { AuthContext } from '../../context/authContext';
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -58,6 +75,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar }) => {
 
 // Dashboard Component
 const Dashboard = () => {
+  const { logout } = useContext(AuthContext);
   const [user, setUser] = useState({
     name: 'Faysal Ahammed',
     email: 'faysal@example.com',
@@ -67,22 +85,26 @@ const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Chart Data (Static for demonstration purposes)
-  const chartData = Array(6).fill(null).map((_, index) => ({
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-    datasets: [
-      {
-        label: `Health Data ${index + 1}`,
-        data: Array(7).fill(null).map(() => Math.floor(Math.random() * 100)),
-        backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
-          Math.random() * 255
-        )}, ${Math.floor(Math.random() * 255)}, 0.2)`,
-        borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
-          Math.random() * 255
-        )}, ${Math.floor(Math.random() * 255)}, 1)`,
-        borderWidth: 1,
-      },
-    ],
-  }));
+  const chartData = Array(6)
+    .fill(null)
+    .map((_, index) => ({
+      labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      datasets: [
+        {
+          label: `Health Data ${index + 1}`,
+          data: Array(7)
+            .fill(null)
+            .map(() => Math.floor(Math.random() * 100)),
+          backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
+            Math.random() * 255
+          )}, ${Math.floor(Math.random() * 255)}, 0.2)`,
+          borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
+            Math.random() * 255
+          )}, ${Math.floor(Math.random() * 255)}, 1)`,
+          borderWidth: 1,
+        },
+      ],
+    }));
 
   const chartOptions = {
     responsive: true,
@@ -104,8 +126,7 @@ const Dashboard = () => {
   };
 
   const handleLogoutClick = () => {
-    alert('Logging out...');
-    setUser(null); // Clear user info on logout
+    logout(); // Use the logout function from the context
     setIsDropdownOpen(false); // Close dropdown after clicking
   };
 
@@ -115,7 +136,10 @@ const Dashboard = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <Sidebar isCollapsed={isSidebarCollapsed} toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
+      <Sidebar
+        isCollapsed={isSidebarCollapsed}
+        toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
       {/* Main Content */}
       <div className={`flex-1 p-6 ml-${isSidebarCollapsed ? '20' : '64'}`}>
