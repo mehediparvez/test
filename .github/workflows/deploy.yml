@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+      - ci/cd-pipeline
     paths:
       - 'frontend/**'
       - '.github/workflows/deploy.yml'
