@@ -42,6 +42,7 @@ jobs:
       - name: Run tests with coverage for backend
         run: |
           cd backend
+          export DJANGO_SETTINGS_MODULE=core.settings
           pytest --cov=. --cov-report=xml:coverage.xml
         continue-on-error: true
 
@@ -56,3 +57,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=Learnathon-By-Geeky-Solutions_web-wizards
+            -Dsonar.sonar.alm.enabled=false
