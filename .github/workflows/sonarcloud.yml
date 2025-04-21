@@ -1,0 +1,63 @@
+name: SonarCloud Analysis
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [reopened, synchronize, opened]
+  push:
+    branches:
+      - main
+
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies for backend
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install coverage pytest pytest-cov
+          
+      # - name: Install dependencies for OCR service
+      #   run: |
+      #     cd ocr_service
+      #     pip install -r requirements.txt
+      #     pip install coverage pytest pytest-cov
+
+      - name: Run tests with coverage for backend
+        run: |
+          cd backend
+          export DJANGO_SETTINGS_MODULE=core.settings
+          pytest --cov=. --cov-report=xml:coverage.xml
+        continue-on-error: true
+
+      # - name: Run tests with coverage for OCR service
+      #   run: |
+      #     cd ocr_service
+      #     pytest --cov=. --cov-report=xml:coverage.xml
+      #   continue-on-error: true
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=Learnathon-By-Geeky-Solutions_web-wizards
+            -Dsonar.sonar.alm.enabled=false
