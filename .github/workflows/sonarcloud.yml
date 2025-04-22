@@ -42,8 +42,13 @@ jobs:
       - name: Run tests with coverage for backend
         run: |
           cd backend
+          # Make sure the directory is in PYTHONPATH
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
           export DJANGO_SETTINGS_MODULE=core.settings
-          pytest --cov=. --cov-report=xml:coverage.xml
+          python -c "import sys; print(sys.path)"
+          python -c "import os; print(os.environ.get('DJANGO_SETTINGS_MODULE'))"
+          # Run pytest with coverage
+          python -m pytest --cov=. --cov-report=xml:coverage.xml
         continue-on-error: true
 
       # - name: Run tests with coverage for OCR service
@@ -61,3 +66,4 @@ jobs:
           args: >
             -Dsonar.projectKey=Learnathon-By-Geeky-Solutions_web-wizards
             -Dsonar.sonar.alm.enabled=false
+            -Dsonar.python.coverage.reportPaths=backend/coverage.xml
