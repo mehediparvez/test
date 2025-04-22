@@ -1,15 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+    },
+  },
   server: {
-    host: '0.0.0.0',  // Bind to all network interfaces
-    port: 5173, 
-    strictport:true,
-    watch:{
-      usepolling:true
-    },       // Ensure the port is set correctly
+    host: true,
+    port: 5173,
+    strictPort: true,
+    watch: {
+      usePolling: true 
+    },
+    hmr: {
+      clientPort: 5173 
+    }
   }
 })

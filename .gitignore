@@ -1,3 +1,7 @@
 .env
 web_wizards/
 temp.txt
+ibn-sina.html
+*.html
+scrape.py
+sleep.py
