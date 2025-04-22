@@ -33,6 +33,9 @@ class PatientProfile(models.Model):
     height = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     bmi = models.CharField(max_length=10, blank=True, default="")
+    
+    class Meta:
+        app_label = 'users'
 
     def __str__(self):
         return str(self.user)

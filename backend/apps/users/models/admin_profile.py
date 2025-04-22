@@ -18,5 +18,8 @@ class AdminProfile(models.Model):
     image = CloudinaryField('image', null=True, blank=True)
     gender = models.CharField(max_length=10, choices=gender)
     
+    class Meta:
+        app_label = 'users'
+    
     def __str__(self):
         return str(self.user)

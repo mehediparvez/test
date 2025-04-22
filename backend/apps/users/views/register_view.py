@@ -27,10 +27,15 @@ class RegisterView(generics.CreateAPIView):
             "user_type": data.get("user_type")
         }
 
+        # Use either dateOfBirth or dob field as provided in the request
+        dob = data.get("dateOfBirth") or data.get("dob")
+        # Use either Gender or gender field as provided in the request
+        gender = data.get("Gender") or data.get("gender")
+
         profile_data = {
             "phone": data.get("phone"),
-            "dob": data.get("dateOfBirth"),
-            "gender": data.get("Gender"),
+            "dob": dob,
+            "gender": gender,
             "address": data.get("address"),
         }
 

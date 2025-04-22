@@ -45,6 +45,9 @@ class Users(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
+    
+    class Meta:
+        app_label = 'users'
 
     def __str__(self):
         return str(self.email)
