@@ -15,6 +15,8 @@ router.register(r'reviews', ReviewViewSet, basename='review')
 
 app_name = 'clinicians'
 
+# Define custom action URLs before including router.urls to ensure proper priority
 urlpatterns = [
+    path('diagnostic-centers/top-rated/', DiagnosticCenterViewSet.as_view({'get': 'top_rated'}), name='diagnostic-centers-top-rated'),
     path('', include(router.urls)),
 ]

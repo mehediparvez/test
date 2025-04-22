@@ -8,14 +8,21 @@ User = get_user_model()
 class LoginViewTestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username="testuser", email="test@example.com", password="password123")
+        # Update to use email, name and user_type
+        self.user = User.objects.create_user(
+            email="test@example.com",
+            name="Test User",
+            password="password123",
+            user_type="Patient"  # Adding the required user_type field
+        )
 
     def test_login_with_valid_credentials(self):
         data = {
             "email": "test@example.com",
             "password": "password123"
         }
-        response = self.client.post("/api/login/", data)
+        # Update URL to use the correct path
+        response = self.client.post("/api/users/login/", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("access", response.data)
         self.assertIn("refresh", response.data)
@@ -25,6 +32,7 @@ class LoginViewTestCase(APITestCase):
             "email": "test@example.com",
             "password": "wrongpassword"
         }
-        response = self.client.post("/api/login/", data)
+        # Update URL to use the correct path
+        response = self.client.post("/api/users/login/", data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn("detail", response.data)
