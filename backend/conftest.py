@@ -27,7 +27,8 @@ def pytest_configure(config):
 # ===== ENVIRONMENT VARIABLES =====
 # Set essential environment variables before Django setup
 if 'SECRET_KEY' not in os.environ:
-    os.environ['SECRET_KEY'] = 'django-insecure-ihi)mr4kts@_9u3^$9)zegd5sibqmww14d2rv+w%g$eu05k!e8'
+    # Use a temporary key for testing purposes only - not for production use
+    os.environ['SECRET_KEY'] = 'test-only-not-for-production'
 
 if 'DEBUG' not in os.environ:
     os.environ['DEBUG'] = 'True'
