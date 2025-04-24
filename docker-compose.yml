@@ -2,6 +2,10 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        - REGISTRY=ghcr.io
+        - OWNER=${GITHUB_ORG:-your-organization}
+    image: ghcr.io/${GITHUB_ORG:-your-organization}/web-wizards-frontend:${TAG:-latest}
     ports:
       - "5173:5173"  # Map Vite development server port
     volumes:
@@ -17,6 +21,12 @@ services:
   backend:
     build:
       context: ./backend
+      args:
+        - REGISTRY=ghcr.io
+        - OWNER=${GITHUB_ORG:-your-organization}
+        - GITHUB_REPOSITORY=${GITHUB_ORG:-your-organization}/web-wizards
+        - GITHUB_REPOSITORY_OWNER=${GITHUB_ORG:-your-organization}
+    image: ghcr.io/${GITHUB_ORG:-your-organization}/web-wizards-backend:${TAG:-latest}
     ports:
       - "8000:8000"  # Map Django server port
     volumes:
@@ -24,7 +34,7 @@ services:
     depends_on:
       - db
     env_file:
-      - .env   #sh -c "python manage.py wait_for_db && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      - .env
 
     command: >
       sh -c "python /app/wait_for_db.py && 

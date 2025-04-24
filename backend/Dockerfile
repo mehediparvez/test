@@ -1,29 +1,33 @@
- # Use Python 3.10 base image
-FROM python:3.10-slim
+FROM python:3.12-slim
 
-# Set working directory
-WORKDIR /app
-
-# Set Python to run in unbuffered mode
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# Create app directory
+WORKDIR /app
+
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libmariadb-dev \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     gcc \
-    libmariadb-dev-compat \
+    default-libmysqlclient-dev \
+    pkg-config \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements file and install dependencies
-COPY requirements.txt ./
+# Install Python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# Copy application code
 COPY . .
 
-# Expose Django development server port
-EXPOSE 8000
+# Add GitHub Container Registry labels
+LABEL org.opencontainers.image.source=https://github.com/YOUR_ORG_NAME/web-wizards
+LABEL org.opencontainers.image.description="Web Wizards Backend"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.vendor="${GITHUB_REPOSITORY_OWNER}"
 
-# Command to run the development server
+# Run the application
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
