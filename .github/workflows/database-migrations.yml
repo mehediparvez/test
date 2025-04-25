@@ -16,6 +16,7 @@ env:
   MYSQL_SERVER_NAME: web-wizards-mysql
   MYSQL_DATABASE_NAME: webwizardsdb
   ENVIRONMENT: production
+  AZURE_REGION: southeastasia  # Updated for Bangladesh users
 
 jobs:
   setup-database:
@@ -41,7 +42,7 @@ jobs:
             az mysql flexible-server create \
               --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
               --name ${{ env.MYSQL_SERVER_NAME }} \
-              --location eastus \
+              --location ${{ env.AZURE_REGION }} \
               --admin-user ${{ secrets.MYSQL_ADMIN_USERNAME }} \
               --admin-password "${{ secrets.MYSQL_ADMIN_PASSWORD }}" \
               --sku-name Standard_B1s \

@@ -14,6 +14,7 @@ env:
   MYSQL_SERVER_NAME: web-wizards-mysql
   MYSQL_DATABASE_NAME: webwizardsdb
   ENVIRONMENT: production
+  AZURE_REGION: southeastasia  # Updated for Bangladesh users
 
 jobs:
   check-migration-status:
@@ -79,7 +80,7 @@ jobs:
             az containerapp env create \
               --name $ENVIRONMENT_NAME \
               --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-              --location eastus
+              --location ${{ env.AZURE_REGION }}
       
       - name: Deploy backend to Container App
         uses: azure/CLI@v1
