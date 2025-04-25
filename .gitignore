@@ -5,3 +5,6 @@ ibn-sina.html
 *.html
 scrape.py
 sleep.py
+.env.development
+.env.production
+test
