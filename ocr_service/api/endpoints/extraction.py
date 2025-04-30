@@ -32,7 +32,8 @@ class URLHandler:
     def is_cloudinary_url(url):
         """Check if a URL is from Cloudinary."""
         parsed_url = urlparse(url)
-        return 'cloudinary.com' in parsed_url.netloc
+        hostname = parsed_url.netloc
+        return hostname == 'cloudinary.com' or hostname.endswith('.cloudinary.com')
 
     @staticmethod
     def get_cloudinary_direct_url(url):
