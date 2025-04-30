@@ -21,9 +21,20 @@ import cloudinary.api
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env file
+# Load environment variables from appropriate .env file
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# Check if we're in production mode
+# Azure App Service sets WEBSITE_SITE_NAME environment variable
+IS_PRODUCTION = os.environ.get('WEBSITE_SITE_NAME') is not None or os.environ.get('PRODUCTION') == 'true'
+
+# Load the appropriate environment file
+if IS_PRODUCTION:
+    print("Loading production environment")
+    environ.Env.read_env(os.path.join(BASE_DIR, '.env.production'))
+else:
+    print("Loading development environment")
+    environ.Env.read_env(os.path.join(BASE_DIR, '.env.development'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -35,17 +46,9 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',          # Allow access via 127.0.0.1
-    'localhost',          # Allow access via localhost
-]
-
-# CORS_ORIGIN_WHITELIST = [
-#    'http://localhost:5173',
-# ]
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-]
+# Parse ALLOWED_HOSTS and CORS_ORIGIN as comma separated lists
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
+CORS_ALLOWED_ORIGINS = env.list('CORS_ORIGIN', default=['http://localhost:5173'])
 
 AUTH_USER_MODEL = 'users.Users'
 # Application definition
@@ -68,16 +71,32 @@ INSTALLED_APPS = [
     'apps.clinicians',
 ]
 
-MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+# Add debug toolbar in development
+if not IS_PRODUCTION and env.bool('USE_DEBUG_TOOLBAR', default=False):
+    INSTALLED_APPS.append('debug_toolbar')
+    MIDDLEWARE = [
+        'corsheaders.middleware.CorsMiddleware',
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ]
+    INTERNAL_IPS = ['127.0.0.1']
+else:
+    MIDDLEWARE = [
+        'corsheaders.middleware.CorsMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ]
 
 ROOT_URLCONF = 'core.urls'
 
@@ -113,6 +132,10 @@ DATABASES = {
         'PORT': env('DATABASE_PORT'),
     }
 }
+
+# If in Azure, configure SSL for MySQL if available
+if IS_PRODUCTION and os.environ.get('SSL_CA'):
+    DATABASES['default']['OPTIONS'] = {'ssl': {'ca': os.environ.get('SSL_CA')}}
 
 
 # Password validation
@@ -150,6 +173,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -189,4 +213,28 @@ CLOUDINARY_STORAGE = {
 }
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+
+# Configure logging based on environment
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': env('DJANGO_LOG_LEVEL', default='INFO'),
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': env('DJANGO_LOG_LEVEL', default='INFO'),
+    },
+}
 
