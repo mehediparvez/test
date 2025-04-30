@@ -1,15 +1,20 @@
+version: '3'
+
 services:
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-local}/web-wizards-frontend:${TAG:-dev}
     ports:
-      - "5173:5173"  # Map Vite development server port
+      - "5173:5173"
     volumes:
-      - ./frontend:/app  # Mount local code
-      - /app/node_modules  # Avoid overwriting node_modules
+      - ./frontend:/app
+      - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+      - VITE_API_URL=${BACKEND_URL:-http://localhost:8000/api}
     stdin_open: true
     tty: true
     command: ["npm", "run", "dev", "--", "--host"]
@@ -17,28 +22,45 @@ services:
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-local}/web-wizards-backend:${TAG:-dev}
     ports:
-      - "8000:8000"  # Map Django server port
+      - "8000:8000"
     volumes:
-      - ./backend:/app  # Mount local code
+      - ./backend:/app
     depends_on:
       - db
-    env_file:
-      - .env   #sh -c "python manage.py wait_for_db && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-
-    command: >
-      sh -c "python /app/wait_for_db.py && 
-             python manage.py migrate --no-input && 
-             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      # These are used as fallbacks if .env.development doesn't exist
+      - DATABASE_HOST=db
+      - DATABASE_NAME=webwizardsdb
+      - DATABASE_USER=webwizard
+      - DATABASE_PASSWORD=password
+      - SECRET_KEY=django-insecure-development-key-for-local-use-only
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1
 
   db:
     image: mysql:8.0
     ports:
-      - "3306:3306"  # Map MySQL port
-    env_file:
-      - .env
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=${DATABASE_NAME:-webwizardsdb}
+      - MYSQL_USER=${DATABASE_USER:-webwizard}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD:-password}
     volumes:
       - db_data:/var/lib/mysql
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+      --performance-schema=OFF
+      --max_connections=100
+      --innodb_buffer_pool_size=134217728
+      --connect_timeout=10
+      --wait_timeout=180
 
 volumes:
-  db_data:  # Named volume for MySQL persistence
+  db_data:

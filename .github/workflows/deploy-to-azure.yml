@@ -1,0 +1,112 @@
+name: Deploy to Azure Container Apps
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Images"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  AZURE_RESOURCE_GROUP: web-wizards-rg
+  CONTAINER_ENV_NAME: web-wizards-rg-env
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: web-wizards-backend
+  MYSQL_SERVER_NAME: webwizards-mysql
+  MYSQL_DATABASE_NAME: webwizardsdb
+  LOCATION: southeastasia
+
+jobs:
+  deploy-container-apps:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Setup Container Apps Environment
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            # Check if environment exists, create if not
+            az containerapp env show \
+              --name ${{ env.CONTAINER_ENV_NAME }} \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} || \
+            az containerapp env create \
+              --name ${{ env.CONTAINER_ENV_NAME }} \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --location ${{ env.LOCATION }}
+      
+      - name: Deploy Backend Container App
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            # Check if container app exists
+            if az containerapp show --name web-wizards-backend --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
+              # Update existing container app
+              echo "Updating backend container app..."
+              az containerapp update \
+                --name web-wizards-backend \
+                --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                --image ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.BACKEND_IMAGE }}:latest
+            else
+              # Create new container app
+              echo "Creating backend container app..."
+              az containerapp create \
+                --name web-wizards-backend \
+                --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                --environment ${{ env.CONTAINER_ENV_NAME }} \
+                --image ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.BACKEND_IMAGE }}:latest \
+                --registry-server ${{ env.REGISTRY }} \
+                --registry-username ${{ github.actor }} \
+                --registry-password ${{ secrets.GITHUB_TOKEN }} \
+                --target-port 8000 \
+                --ingress external \
+                --cpu 0.25 \
+                --memory 0.5Gi \
+                --min-replicas 0 \
+                --max-replicas 1
+            fi
+            
+            # Configure environment variables explicitly for production
+            az containerapp update \
+              --name web-wizards-backend \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --set-env-vars \
+                ENVIRONMENT=production \
+                DATABASE_HOST=${{ env.MYSQL_SERVER_NAME }}.mysql.database.azure.com \
+                DATABASE_NAME=${{ env.MYSQL_DATABASE_NAME }} \
+                DATABASE_USER=${{ secrets.MYSQL_ADMIN_USERNAME }} \
+                DATABASE_PASSWORD=${{ secrets.MYSQL_ADMIN_PASSWORD }} \
+                SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
+                DEBUG=False \
+                ALLOWED_HOSTS="*,.azurewebsites.net" \
+                CORS_ORIGIN=${{ secrets.CORS_ORIGIN || 'https://webwizards.vercel.app' }} \
+                CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME || '' }} \
+                CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY || '' }} \
+                CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET || '' }} \
+                DJANGO_LOG_LEVEL=INFO
+      
+      - name: Get Backend URL
+        id: get-url
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            BACKEND_URL=$(az containerapp show \
+              --name web-wizards-backend \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --query properties.configuration.ingress.fqdn \
+              --output tsv)
+            
+            echo "backend_url=https://$BACKEND_URL" >> $GITHUB_OUTPUT
+            echo "Backend URL: https://$BACKEND_URL"
+      
+      - name: Deployment Summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend API | ${{ steps.get-url.outputs.backend_url }} |" >> $GITHUB_STEP_SUMMARY
