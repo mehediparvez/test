@@ -1,0 +1,67 @@
+FROM python:3.12-slim as builder
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Create app directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies in a virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Second stage: final image
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+
+# Set environment variables
+ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV ENVIRONMENT=production
+ENV DEBUG=False
+
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    default-libmysqlclient-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user to run the app
+RUN useradd -m appuser
+RUN chown -R appuser:appuser /app
+
+# Copy application code
+COPY . .
+
+# Set permissions
+RUN chmod +x /app/wait_for_db.py
+
+# Switch to non-root user
+USER appuser
+
+# Add GitHub Container Registry labels
+LABEL org.opencontainers.image.source=https://github.com/YOUR_ORG_NAME/web-wizards
+LABEL org.opencontainers.image.description="Web Wizards Backend Service"
+LABEL org.opencontainers.image.licenses="MIT"
+
+# Run gunicorn server
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "core.wsgi:application"]
