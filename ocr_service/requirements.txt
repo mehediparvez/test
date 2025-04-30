@@ -1,0 +1,29 @@
+annotated-types
+anyio
+certifi
+charset-normalizer
+click
+cloudinary  # Added for Cloudinary integration
+fastapi
+google-generativeai>=0.8.0  # Added for Gemini AI integration
+h11
+idna
+numpy
+opencv-python
+packaging
+pdf2image
+pillow
+pydantic
+pydantic_core
+pydantic_settings
+PyPDF2
+pytest
+pytesseract
+python-multipart
+requests
+sniffio
+starlette
+typing_extensions
+urllib3
+uvicorn
+openai  # Kept for backward compatibility
