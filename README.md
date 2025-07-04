@@ -29,6 +29,11 @@ The application is built with a modern tech stack and follows a microservices ar
 - **FastAPI**: High-performance OCR and document processing service
 - **AI Processing**: Integration with OpenAI/Gemini models for medical document analysis
 
+### Medical Chatbot
+- **Flask API**: AI-powered symptom analysis and health recommendations
+- **Machine Learning**: Scikit-learn based disease prediction model
+- **Real-time Chat**: Interactive medical assistant with natural language processing
+
 ### DevOps
 - **Docker & Docker Compose**: Containerization
 - **Azure Container Apps**: Cloud deployment platform
@@ -63,6 +68,13 @@ The application is built with a modern tech stack and follows a microservices ar
 - Parameter classification and abnormality detection
 - Trend analysis and visualization
 
+### Medical Assistant Chatbot
+- AI-powered symptom analysis and disease prediction
+- Personalized health recommendations and precautions
+- Natural language conversation interface
+- Medication, diet, and exercise suggestions
+- Real-time chat with typing indicators
+
 ## Getting Started
 1. Clone the repository
    ```bash
@@ -87,11 +99,32 @@ The application is built with a modern tech stack and follows a microservices ar
 
 3. Set Up Environment Variables
    - Create `.env` files for each service based on the provided examples
+   - Configure chatbot API URL in frontend environment
 
 4. Start Development Servers
    ```bash
-   # Using Docker Compose
-   docker-compose -f docker-compose.dev.yml up
+   # Using Docker Compose (includes chatbot service)
+   docker-compose up
+   ```
+
+   Or start services individually:
+   ```bash
+   # Backend
+   cd backend && python manage.py runserver
+   
+   # Frontend  
+   cd frontend && npm run dev
+   
+   # Chatbot
+   cd chatbot && python app.py
+   
+   # OCR Service
+   cd ocr_service && uvicorn main:app --reload
+   ```
+
+5. Test Chatbot Integration
+   ```bash
+   python test_chatbot_integration.py
    ```
 
 ## Development Guidelines
@@ -119,6 +152,7 @@ The application is built with a modern tech stack and follows a microservices ar
 - [Development Setup](https://amarhealth.tech/docs/setup)
 - [Database Schema](https://amarhealth.tech/docs/schema)
 - [OCR Service Integration](https://amarhealth.tech/docs/ocr-service)
+- [Chatbot Integration Guide](CHATBOT_INTEGRATION.md)
 - [Contribution Guidelines](https://amarhealth.tech/docs/contributing)
 
 ## Resources

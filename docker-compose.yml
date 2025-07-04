@@ -15,6 +15,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - VITE_API_URL=${BACKEND_URL:-http://localhost:8000/api}
+      - VITE_CHATBOT_API_URL=${CHATBOT_URL:-http://localhost:5000/api}
     stdin_open: true
     tty: true
     command: ["npm", "run", "dev", "--", "--host"]
@@ -40,6 +41,25 @@ services:
       - SECRET_KEY=django-insecure-development-key-for-local-use-only
       - DEBUG=True
       - ALLOWED_HOSTS=localhost,127.0.0.1
+
+  chatbot:
+    build:
+      context: ./chatbot
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-local}/web-wizards-chatbot:${TAG:-dev}
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./chatbot:/app
+    environment:
+      - FLASK_ENV=${ENVIRONMENT:-development}
+      - PORT=5000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   db:
     image: mysql:8.0
